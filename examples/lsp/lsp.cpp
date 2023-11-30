@@ -33,7 +33,7 @@ struct whisper_params {
     bool use_gpu       = true;
 
     std::string language  = "en";
-    std::string model     = "models/ggml-base.en.bin";
+    std::string model     = "~/.models/ggml-medium.bin";
 };
 struct command {
     std::vector<whisper_token> tokens;

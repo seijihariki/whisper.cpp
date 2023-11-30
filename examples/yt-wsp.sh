@@ -49,7 +49,7 @@ SCRIPT_DIR="${SCRIPT_PATH%/*}"
 # note: unless a multilingual model is specified, WHISPER_LANG will be ignored
 # and the video will be transcribed as if the audio were in the English language
 ################################################################################
-MODEL_PATH="${MODEL_PATH:-${SCRIPT_DIR}/../models/ggml-base.en.bin}"
+MODEL_PATH="${MODEL_PATH:-${SCRIPT_DIR}/../~/.models/ggml-medium.bin}"
 
 ################################################################################
 # Where to find the whisper.cpp executable.  default to the examples directory
@@ -69,13 +69,13 @@ msg() {
 
 cleanup() {
     local -r clean_me="${1}";
-
+    
     if [ -d "${clean_me}" ]; then
-      msg "Cleaning up...";
-      rm -rf "${clean_me}";
+        msg "Cleaning up...";
+        rm -rf "${clean_me}";
     else
-      msg "'${clean_me}' does not appear to be a directory!";
-      exit 1;
+        msg "'${clean_me}' does not appear to be a directory!";
+        exit 1;
     fi;
 }
 
@@ -96,12 +96,12 @@ check_requirements() {
         echo "ffmpeg is required: https://ffmpeg.org";
         exit 1
     fi;
-
+    
     if ! command -v yt-dlp &>/dev/null; then
         echo "yt-dlp is required: https://github.com/yt-dlp/yt-dlp";
         exit 1;
     fi;
-
+    
     if ! command -v "${WHISPER_EXECUTABLE}" &>/dev/null; then
         echo "The C++ implementation of Whisper is required: https://github.com/ggerganov/whisper.cpp"
         echo "Sample usage:";
@@ -113,7 +113,7 @@ check_requirements() {
         echo "";
         exit 1;
     fi;
-
+    
 }
 
 if [[ "${#}" -lt 1 ]]; then
@@ -150,51 +150,51 @@ msg "Downloading VOD...";
 # for videos only available to logged-in users.
 ################################################################################
 yt-dlp \
-    -f "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best" \
-    -o "${temp_dir}/%(title)s-%(id)s.vod.mp4" \
-    --print-to-file "%(filename)s" "${temp_filename}" \
-    --no-simulate \
-    --no-write-auto-subs \
-    --restrict-filenames \
-    --embed-thumbnail \
-    --embed-chapters \
-    --xattrs \
-    "${source_url}";
+-f "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best" \
+-o "${temp_dir}/%(title)s-%(id)s.vod.mp4" \
+--print-to-file "%(filename)s" "${temp_filename}" \
+--no-simulate \
+--no-write-auto-subs \
+--restrict-filenames \
+--embed-thumbnail \
+--embed-chapters \
+--xattrs \
+"${source_url}";
 
 title_name="$(xargs basename -s .vod.mp4 < ${temp_filename})";
 
 msg "Extracting audio and resampling...";
 
 ffmpeg -i "${temp_dir}/${title_name}.vod.mp4"  \
-    -hide_banner \
-    -vn \
-    -loglevel error \
-    -ar 16000 \
-    -ac 1 \
-    -c:a pcm_s16le \
-    -y \
-    "${temp_dir}/${title_name}.vod-resampled.wav";
+-hide_banner \
+-vn \
+-loglevel error \
+-ar 16000 \
+-ac 1 \
+-c:a pcm_s16le \
+-y \
+"${temp_dir}/${title_name}.vod-resampled.wav";
 
 msg "Transcribing to subtitle file...";
 msg "Whisper specified at: '${WHISPER_EXECUTABLE}'";
 
 "${WHISPER_EXECUTABLE}" \
-    -m "${MODEL_PATH}" \
-    -l "${WHISPER_LANG}" \
-    -f "${temp_dir}/${title_name}.vod-resampled.wav" \
-    -t "${WHISPER_THREAD_COUNT}" \
-    -osrt \
-    --translate;
+-m "${MODEL_PATH}" \
+-l "${WHISPER_LANG}" \
+-f "${temp_dir}/${title_name}.vod-resampled.wav" \
+-t "${WHISPER_THREAD_COUNT}" \
+-osrt \
+--translate;
 
 msg "Embedding subtitle track...";
 
 ffmpeg -i "${temp_dir}/${title_name}.vod.mp4" \
-    -hide_banner \
-    -loglevel error \
-    -i "${temp_dir}/${title_name}.vod-resampled.wav.srt" \
-    -c copy \
-    -c:s mov_text \
-    -y "${title_name}-res.mp4";
+-hide_banner \
+-loglevel error \
+-i "${temp_dir}/${title_name}.vod-resampled.wav.srt" \
+-c copy \
+-c:s mov_text \
+-y "${title_name}-res.mp4";
 
 #cleanup "${temp_dir}";
 

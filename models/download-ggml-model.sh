@@ -59,7 +59,6 @@ function list_models {
 if [ "$#" -ne 1 ]; then
     printf "Usage: $0 <model>\n"
     list_models
-
     exit 1
 fi
 
@@ -68,9 +67,10 @@ model=$1
 if [[ ! " ${models[@]} " =~ " ${model} " ]]; then
     printf "Invalid model: $model\n"
     list_models
-
     exit 1
 fi
+
+mkdir -p "~/.models/"
 
 # check if model contains `tdrz` and update the src and pfx accordingly
 if [[ $model == *"tdrz"* ]]; then
@@ -84,15 +84,15 @@ printf "Downloading ggml model $model from '$src' ...\n"
 
 cd "$models_path"
 
-if [ -f "ggml-$model.bin" ]; then
+if [ -f "~/.models/ggml-$model.bin" ]; then
     printf "Model $model already exists. Skipping download.\n"
     exit 0
 fi
 
 if [ -x "$(command -v wget)" ]; then
-    wget --no-config --quiet --show-progress -O ggml-$model.bin $src/$pfx-$model.bin
-elif [ -x "$(command -v curl)" ]; then
-    curl -L --output ggml-$model.bin $src/$pfx-$model.bin
+    wget --no-config --quiet --show-progress -O ~/.models/ggml-$model.bin $src/$pfx-$model.bin
+    elif [ -x "$(command -v curl)" ]; then
+    curl -L --output ~/.models/ggml-$model.bin $src/$pfx-$model.bin
 else
     printf "Either wget or curl is required to download models.\n"
     exit 1
