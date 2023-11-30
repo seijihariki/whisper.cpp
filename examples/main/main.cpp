@@ -624,8 +624,7 @@ bool output_srt(struct whisper_context *ctx, const char *fname, const whisper_pa
                 const float p = whisper_full_get_token_p(ctx, i, j);
 
                 const int col = std::max(0, std::min((int)k_colors.size() - 1, (int)(std::pow(p, 3) * float(k_colors.size()))));
-
-                printf("%s%s%s%s", speaker.c_str(), k_colors[col].c_str(), text, "\033[0m");
+                // TODO
                 fout << text;
             }
 
