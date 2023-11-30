@@ -35,8 +35,8 @@ struct whisper_params {
 
     std::string person    = "Santa";
     std::string language  = "en";
-    std::string model_wsp = "~/.models/ggml-medium.bin";
-    std::string model_gpt = "models/ggml-gpt-2-117M.bin";
+    std::string model_wsp = getenv("HOME") + std::string("/.models/ggml-medium.bin");
+    std::string model_gpt = getenv("HOME") + std::string("/.models/ggml-gpt-2-117M.bin");
     std::string speak     = "./examples/talk/speak";
     std::string fname_out;
 };

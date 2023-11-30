@@ -46,7 +46,7 @@ ffmpeg -y -i ./rec.wav -ar 16000 -ac 1 -c:a pcm_s16le ./rec16.wav > /dev/null 2>
 
 # run Whisper
 echo "Processing ..."
-./main -m ~/.models/ggml-medium.bin rec16.wav -owts > /dev/null 2>&1
+./main -m $HOME/.models/ggml-medium.bin rec16.wav -owts > /dev/null 2>&1
 
 # generate Karaoke video
 echo "Generating video ..."
